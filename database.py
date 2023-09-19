@@ -1,13 +1,22 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import DeclarativeBase
-from sqlalchemy.orm import sessionmaker
-import databases
+from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
 
 
-DATABASE_URL = "sqlite:///./store.db"
-database = databases.Database(DATABASE_URL)
+
+
+DATABASE_URL = "sqlite:///D:/API_Training/Store_FastAPI/store.db"
+
 engine = create_engine(DATABASE_URL)
 
-base = DeclarativeBase()
+#Scoped sessions for thread-local sessions and easy session instantiation through db_session()
+db_session = scoped_session(sessionmaker(bind=engine))
 
-session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db() -> db_session:
+    db = db_session()
+    try:
+        yield db
+    finally:
+        db.close()
+
