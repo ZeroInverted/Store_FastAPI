@@ -1,6 +1,7 @@
 from models.category_model import Category
 from schemas.category_schema import CategoryInput
 from sqlalchemy.orm import Session
+import json
 # skip and limit for pagination
 def get_all_categories(db: Session, skip: int =0, limit: int =0) -> list[Category]:
     return db.query(Category).offset(skip).limit(limit).all()
