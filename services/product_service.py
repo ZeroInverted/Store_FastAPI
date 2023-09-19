@@ -4,8 +4,11 @@ from schemas.product_schema import ProductInput
 from sqlalchemy.orm import Session
 #GET
 # skip and limit for pagination
-def get_all_products(db: Session, skip: int =0, limit: int =0) -> list[Product]:
-    return db.query(Product).offset(skip).limit(limit).all()
+def get_all_products(db: Session, skip: int =0, limit: int =0, cat_id: int =0) -> list[Product]:
+    if cat_id ==0:
+        return db.query(Product).offset(skip).limit(limit).all()
+    else:
+        return db.query(Product).filter(Product.category_id==cat_id).offset(skip).limit(limit)
 #POST
 def create_product(db: Session, product: ProductInput) -> Product:
     # serialize category input as dict, and then use ** to unpack dict to use as params.
@@ -19,16 +22,13 @@ def create_product(db: Session, product: ProductInput) -> Product:
 def get_product_by_id(db: Session, id: int) -> Product:
     product = db.query(Product).filter(Product.id == id).first()
     if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=404, detail=f"Product with id: {id} is not found")
     return product
 
-#GET{categoryid}
-def get_products_by_category(db: Session, cat_id: int) -> list[Product]:
-    products = db.query(Product).filter(Product.category_id == cat_id)
 
 #PUT{id}
 def put_product(db:Session, id: int, new_product: Product) -> Product:
-    product = db.query(Product).filter(Product.id==id)
+    product = db.query(Product).filter(Product.id==id).first()
     if product is None:
         raise HTTPException(status_code=404, detail=f"Product with id: {id} is not found")
     else:
